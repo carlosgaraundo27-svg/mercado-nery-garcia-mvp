@@ -11,7 +11,10 @@ const pool = mysql.createPool({
   connectionLimit: 10, // Límite razonable para evitar cuellos de botella
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelay: 0
+  keepAliveInitialDelay: 0,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 module.exports = pool;
