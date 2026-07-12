@@ -52,3 +52,35 @@ describe('Error Handling Middleware', () => {
   });
 });
 
+describe('CORS Configuration', () => {
+  it('should include FRONTEND_URL in allowed origins if specified', async () => {
+    const originalFrontendUrl = process.env.FRONTEND_URL;
+    const originalNodeEnv = process.env.NODE_ENV;
+    
+    process.env.FRONTEND_URL = 'http://testfrontend.com';
+    process.env.NODE_ENV = 'development';
+
+    let isolatedApp;
+    jest.isolateModules(() => {
+      isolatedApp = require('../app');
+    });
+
+    process.env.FRONTEND_URL = originalFrontendUrl;
+    process.env.NODE_ENV = originalNodeEnv;
+
+    const response = await request(isolatedApp)
+      .get('/health')
+      .set('Origin', 'http://testfrontend.com');
+    expect(response.status).toBe(200);
+  });
+
+  it('should block unauthorized CORS origins', async () => {
+    const response = await request(app)
+      .get('/health')
+      .set('Origin', 'http://unauthorized.com');
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty('error');
+  });
+});
+
+

@@ -42,6 +42,21 @@ describe('Inventory Controller & Auth Middleware Tests', () => {
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('error', 'Token no válido o expirado.');
     });
+
+    it('should return 500 if JWT_SECRET is not configured', async () => {
+      const originalJwtSecret = process.env.JWT_SECRET;
+      delete process.env.JWT_SECRET;
+      try {
+        const response = await request(app)
+          .get('/api/inventory')
+          .set('Authorization', `Bearer ${VALID_TOKEN}`);
+        
+        expect(response.status).toBe(500);
+        expect(response.body).toHaveProperty('error', 'Error de configuración del servidor. JWT_SECRET no configurado.');
+      } finally {
+        process.env.JWT_SECRET = originalJwtSecret;
+      }
+    });
   });
 
   describe('POST /api/inventory (crearProducto)', () => {

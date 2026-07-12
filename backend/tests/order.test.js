@@ -134,4 +134,32 @@ describe('Order Controller Tests (Transactions & PDF)', () => {
     expect(mockConnection.rollback).toHaveBeenCalledTimes(1);
     expect(mockConnection.release).toHaveBeenCalledTimes(1);
   });
+
+  it('should process order successfully and default to N/A when nombre_puesto is missing', async () => {
+    mockConnection.execute
+      .mockResolvedValueOnce([[
+        { id: 1, nombre: 'Carne de Res', precio: 22.50, stock: 15, usuario_id: 10, vendedor_nombre: 'Dora Nery', nombre_puesto: null }
+      ]]) // SELECT (nombre_puesto is null)
+      .mockResolvedValueOnce([{ affectedRows: 1 }]) // UPDATE stock
+      .mockResolvedValueOnce([{ insertId: 502 }]) // INSERT venta
+      .mockResolvedValueOnce([{ affectedRows: 1 }]); // INSERT detalle
+
+    const response = await request(app)
+      .post('/api/orders')
+      .send({
+        producto_id: 1,
+        cantidad: 2,
+        cliente_nombre: 'Carlos Comprador',
+        metodo_pago: 'Yape'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toBe('application/pdf');
+    expect(response.headers['content-disposition']).toContain('attachment; filename=recibo_502.pdf');
+    expect(Buffer.isBuffer(response.body)).toBe(true);
+
+    expect(mockConnection.beginTransaction).toHaveBeenCalledTimes(1);
+    expect(mockConnection.commit).toHaveBeenCalledTimes(1);
+    expect(mockConnection.release).toHaveBeenCalledTimes(1);
+  });
 });

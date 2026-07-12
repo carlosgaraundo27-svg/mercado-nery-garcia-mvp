@@ -169,36 +169,43 @@ describe('Auth Controller Tests', () => {
 
   describe('POST /api/auth/login', () => {
     it('should login successfully and return a token', async () => {
-      // Simular que el usuario existe y está activo
-      db.execute.mockResolvedValueOnce([[{
-        id: 10,
-        nombre: 'Dora Nery',
-        email: 'dora@nery.com',
-        password: HASHED_PASSWORD,
-        puesto: 'A-15',
-        rubro: 'Carnes y Aves',
-        rol: 'Vendedor',
-        estado: 'activo'
-      }]]);
+      const originalJwtExpiresIn = process.env.JWT_EXPIRES_IN;
+      delete process.env.JWT_EXPIRES_IN;
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
+      try {
+        // Simular que el usuario existe y está activo
+        db.execute.mockResolvedValueOnce([[{
+          id: 10,
+          nombre: 'Dora Nery',
           email: 'dora@nery.com',
-          password: CORRECT_PASSWORD
-        });
+          password: HASHED_PASSWORD,
+          puesto: 'A-15',
+          rubro: 'Carnes y Aves',
+          rol: 'Vendedor',
+          estado: 'activo'
+        }]]);
 
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('token');
-      expect(response.body.user).toEqual({
-        id: 10,
-        nombre: 'Dora Nery',
-        email: 'dora@nery.com',
-        puesto: 'A-15',
-        rubro: 'Carnes y Aves',
-        rol: 'Vendedor'
-      });
-      expect(db.execute).toHaveBeenCalledTimes(1);
+        const response = await request(app)
+          .post('/api/auth/login')
+          .send({
+            email: 'dora@nery.com',
+            password: CORRECT_PASSWORD
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('token');
+        expect(response.body.user).toEqual({
+          id: 10,
+          nombre: 'Dora Nery',
+          email: 'dora@nery.com',
+          puesto: 'A-15',
+          rubro: 'Carnes y Aves',
+          rol: 'Vendedor'
+        });
+        expect(db.execute).toHaveBeenCalledTimes(1);
+      } finally {
+        process.env.JWT_EXPIRES_IN = originalJwtExpiresIn;
+      }
     });
 
     it('should return 400 if login fields are missing', async () => {
@@ -291,6 +298,36 @@ describe('Auth Controller Tests', () => {
 
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty('error', 'DB failure during login');
+    });
+
+    it('should throw an error if JWT_SECRET is not configured during login', async () => {
+      const originalJwtSecret = process.env.JWT_SECRET;
+      delete process.env.JWT_SECRET;
+
+      try {
+        db.execute.mockResolvedValueOnce([[{
+          id: 10,
+          nombre: 'Dora Nery',
+          email: 'dora@nery.com',
+          password: HASHED_PASSWORD,
+          puesto: 'A-15',
+          rubro: 'Carnes y Aves',
+          rol: 'Vendedor',
+          estado: 'activo'
+        }]]);
+
+        const response = await request(app)
+          .post('/api/auth/login')
+          .send({
+            email: 'dora@nery.com',
+            password: CORRECT_PASSWORD
+          });
+
+        expect(response.status).toBe(500);
+        expect(response.body).toHaveProperty('error', 'JWT_SECRET no está configurado en las variables de entorno.');
+      } finally {
+        process.env.JWT_SECRET = originalJwtSecret;
+      }
     });
   });
 });
