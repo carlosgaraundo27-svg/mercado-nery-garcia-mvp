@@ -5,9 +5,9 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #10b981;
-  --color-secondary: #f59e0b;
-  --color-background: #f8fafc;
+  --color-primary: #10b981; /*10b981*/
+  --color-secondary: #f59e0b; /*f59e0b*/
+  --color-background: #f8fafc; /*f8fafc*/
 
   --color-primary-50: #f0fdf4;
   --color-primary-100: #dcfce7;

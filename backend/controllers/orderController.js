@@ -1,57 +1,52 @@
 const db = require('../config/db');
 const PDFDocument = require('pdfkit');
 
-// Función auxiliar para generar el PDF en memoria y retornar un Buffer
-const generateReceiptPDF = (orderData) => {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 30, size: 'A6' }); // Tamaño boleta compacta
-    const buffers = [];
+// Función auxiliar para generar el PDF directamente al response (stream)
+const generateReceiptPDF = (res, orderData) => {
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=recibo_${orderData.ventaId}.pdf`);
 
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {
-      const pdfData = Buffer.concat(buffers);
-      resolve(pdfData);
-    });
-    doc.on('error', reject);
+  const doc = new PDFDocument({ margin: 30, size: 'A6' }); // Tamaño boleta compacta
 
-    // Encabezado
-    doc.fontSize(11).font('Helvetica-Bold').text('MERCADO NERY GARCÍA ZÁRATE', { align: 'center' });
-    doc.fontSize(8).font('Helvetica').text('Ayacucho, Perú', { align: 'center' });
-    doc.text('----------------------------------------------------', { align: 'center' });
-    doc.fontSize(9).font('Helvetica-Bold').text('RECIBO DE COMPRA VIRTUAL', { align: 'center' });
-    doc.text('----------------------------------------------------', { align: 'center' });
-    doc.moveDown(0.5);
+  doc.pipe(res);
 
-    // Datos de la Venta
-    doc.fontSize(8);
-    doc.font('Helvetica-Bold').text('Boleta Nº: ', { continued: true }).font('Helvetica').text(`${orderData.ventaId}`);
-    doc.font('Helvetica-Bold').text('Fecha: ', { continued: true }).font('Helvetica').text(`${new Date().toLocaleString('es-PE')}`);
-    doc.font('Helvetica-Bold').text('Cliente: ', { continued: true }).font('Helvetica').text(`${orderData.clienteNombre}`);
-    doc.font('Helvetica-Bold').text('Vendedor: ', { continued: true }).font('Helvetica').text(`${orderData.vendedorNombre}`);
-    doc.font('Helvetica-Bold').text('Puesto: ', { continued: true }).font('Helvetica').text(`${orderData.nombrePuesto || 'N/A'}`);
-    doc.font('Helvetica-Bold').text('Medio de Pago: ', { continued: true }).font('Helvetica').text(`${orderData.metodoPago}`);
-    doc.text('----------------------------------------------------', { align: 'center' });
-    doc.moveDown(0.5);
+  // Encabezado
+  doc.fontSize(11).font('Helvetica-Bold').text('MERCADO NERY GARCÍA ZÁRATE', { align: 'center' });
+  doc.fontSize(8).font('Helvetica').text('Ayacucho, Perú', { align: 'center' });
+  doc.text('----------------------------------------------------', { align: 'center' });
+  doc.fontSize(9).font('Helvetica-Bold').text('RECIBO DE COMPRA VIRTUAL', { align: 'center' });
+  doc.text('----------------------------------------------------', { align: 'center' });
+  doc.moveDown(0.5);
 
-    // Detalle de Producto
-    doc.font('Helvetica-Bold').text('Ítem / Descripción:', { align: 'left' });
-    doc.font('Helvetica').text(`${orderData.productoNombre}`, { align: 'left' });
-    doc.text(`Cantidad: ${orderData.cantidad} unidades`);
-    doc.text(`Precio Unitario: S/. ${parseFloat(orderData.precioUnitario).toFixed(2)}`);
-    doc.text(`Subtotal: S/. ${parseFloat(orderData.subtotal).toFixed(2)}`);
-    doc.text('----------------------------------------------------', { align: 'center' });
-    doc.moveDown(0.5);
+  // Datos de la Venta
+  doc.fontSize(8);
+  doc.font('Helvetica-Bold').text('Boleta Nº: ', { continued: true }).font('Helvetica').text(`${orderData.ventaId}`);
+  doc.font('Helvetica-Bold').text('Fecha: ', { continued: true }).font('Helvetica').text(`${new Date().toLocaleString('es-PE')}`);
+  doc.font('Helvetica-Bold').text('Cliente: ', { continued: true }).font('Helvetica').text(`${orderData.clienteNombre}`);
+  doc.font('Helvetica-Bold').text('Vendedor: ', { continued: true }).font('Helvetica').text(`${orderData.vendedorNombre}`);
+  doc.font('Helvetica-Bold').text('Puesto: ', { continued: true }).font('Helvetica').text(`${orderData.nombrePuesto || 'N/A'}`);
+  doc.font('Helvetica-Bold').text('Medio de Pago: ', { continued: true }).font('Helvetica').text(`${orderData.metodoPago}`);
+  doc.text('----------------------------------------------------', { align: 'center' });
+  doc.moveDown(0.5);
 
-    // Total
-    doc.fontSize(10).font('Helvetica-Bold').text(`TOTAL PAGADO: S/. ${parseFloat(orderData.total).toFixed(2)}`, { align: 'right' });
-    doc.moveDown(1);
+  // Detalle de Producto
+  doc.font('Helvetica-Bold').text('Ítem / Descripción:', { align: 'left' });
+  doc.font('Helvetica').text(`${orderData.productoNombre}`, { align: 'left' });
+  doc.text(`Cantidad: ${orderData.cantidad} unidades`);
+  doc.text(`Precio Unitario: S/. ${parseFloat(orderData.precioUnitario).toFixed(2)}`);
+  doc.text(`Subtotal: S/. ${parseFloat(orderData.subtotal).toFixed(2)}`);
+  doc.text('----------------------------------------------------', { align: 'center' });
+  doc.moveDown(0.5);
 
-    // Pie de página
-    doc.fontSize(7).font('Helvetica-Oblique').text('Conserva este recibo digital para tu control de compras.', { align: 'center' });
-    doc.text('¡Apoya al comercio local ayacuchano!', { align: 'center' });
+  // Total
+  doc.fontSize(10).font('Helvetica-Bold').text(`TOTAL PAGADO: S/. ${parseFloat(orderData.total).toFixed(2)}`, { align: 'right' });
+  doc.moveDown(1);
 
-    doc.end();
-  });
+  // Pie de página
+  doc.fontSize(7).font('Helvetica-Oblique').text('Conserva este recibo digital para tu control de compras.', { align: 'center' });
+  doc.text('¡Apoya al comercio local ayacuchano!', { align: 'center' });
+
+  doc.end();
 };
 
 // POST /api/orders
@@ -124,8 +119,9 @@ const procesarCompra = async (req, res, next) => {
     // Liberar conexión ya comprometida
     connection.release();
 
-    // 8. Generar el documento PDF del recibo
-    const pdfBuffer = await generateReceiptPDF({
+    // 8. Generar el documento PDF y transmitirlo directamente
+    res.status(200);
+    generateReceiptPDF(res, {
       ventaId,
       clienteNombre: cliente_nombre,
       vendedorNombre: product.vendedor_nombre,
@@ -137,11 +133,7 @@ const procesarCompra = async (req, res, next) => {
       subtotal,
       total
     });
-
-    // 9. Retornar el PDF como respuesta binaria
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=recibo_${ventaId}.pdf`);
-    return res.status(200).send(pdfBuffer);
+    return;
 
   } catch (error) {
     // Si la conexión sigue abierta durante un error, se realiza Rollback para garantizar atomicidad

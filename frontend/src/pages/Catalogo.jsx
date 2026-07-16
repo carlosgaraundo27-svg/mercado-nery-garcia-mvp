@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import ThemeToggle from '../components/ThemeToggle';
-import { 
-  MapPin, 
-  ChevronDown, 
-  Bell, 
-  Search, 
-  ShoppingCart, 
-  Store, 
-  Home, 
-  ClipboardList, 
+import {
+  MapPin,
+  ChevronDown,
+  Bell,
+  Search,
+  ShoppingCart,
+  Store,
+  Home,
+  ClipboardList,
   Settings
 } from 'lucide-react';
 
@@ -92,7 +92,7 @@ const Catalogo = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <ThemeToggle />
           <Link
@@ -124,7 +124,7 @@ const Catalogo = () => {
               <p className="text-[10px] text-slate-300 mt-1 leading-normal">
                 Carnes, pescados, verduras y abarrotes disponibles en tiempo real.
               </p>
-              <button 
+              <button
                 onClick={() => {
                   const el = document.getElementById('catalog-list');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -135,9 +135,9 @@ const Catalogo = () => {
               </button>
             </div>
             <div className="w-5/12 absolute right-0 top-0 bottom-0 flex items-center justify-center overflow-hidden pointer-events-none">
-              <img 
-                src="/fresh_salad_accent.png" 
-                alt="Salad Accent" 
+              <img
+                src="/fresh_salad_accent.png"
+                alt="Salad Accent"
                 className="w-32 h-32 object-cover transform translate-x-4 rotate-12 scale-110 drop-shadow-md"
               />
             </div>
@@ -166,11 +166,10 @@ const Catalogo = () => {
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.id)}
-                className={`px-4 py-2 rounded-full text-[11px] font-extrabold whitespace-nowrap transition-all flex items-center border ${
-                  isActive 
-                    ? 'bg-secondary border-secondary text-white shadow-md scale-102' 
+                className={`px-4 py-2 rounded-full text-[11px] font-extrabold whitespace-nowrap transition-all flex items-center border ${isActive
+                    ? 'bg-secondary border-secondary text-white shadow-md scale-102'
                     : 'bg-white border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:bg-slate-850 dark:hover:bg-slate-750 shadow-xs'
-                }`}
+                  }`}
               >
                 <span className="mr-1.5 text-xs">{categoryEmojis[cat.id]}</span>
                 {cat.nombre}
@@ -211,7 +210,7 @@ const Catalogo = () => {
               {/* Listado de Tarjetas */}
               <div className="space-y-3.5">
                 {filteredProducts.map((product) => (
-                  <div 
+                  <div
                     key={product.id}
                     className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex items-center space-x-4 border border-slate-100/50 dark:border-slate-700/30"
                   >
@@ -249,7 +248,7 @@ const Catalogo = () => {
                       <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 px-2 py-0.5 rounded-full text-[9px] font-bold">
                         Stock: {product.stock}
                       </span>
-                      
+
                       <button
                         onClick={() => navigate('/checkout', { state: { product } })}
                         className="px-2.5 py-1.5 bg-primary hover:bg-emerald-600 active:scale-95 text-white rounded-lg text-[10px] font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm"
@@ -285,8 +284,8 @@ const Catalogo = () => {
       <div className="fixed bottom-0 left-0 right-0 z-20 max-w-md mx-auto w-full bg-secondary text-white rounded-t-3xl shadow-xl border-t border-secondary-600/10 px-6 py-2 pb-3.5 transition-colors duration-200">
         <div className="flex justify-between items-end">
           {/* Home */}
-          <button 
-            onClick={() => navigate('/')} 
+          <button
+            onClick={() => navigate('/')}
             className="flex flex-col items-center justify-center flex-1 py-1 text-white hover:opacity-80 transition cursor-pointer"
           >
             <Home size={20} className="stroke-[2.5]" />
@@ -294,14 +293,14 @@ const Catalogo = () => {
           </button>
 
           {/* Search */}
-          <button 
+          <button
             onClick={() => {
               const searchInput = document.querySelector('input[placeholder="Buscar productos por nombre, puesto..."]');
               if (searchInput) {
                 searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 searchInput.focus();
               }
-            }} 
+            }}
             className="flex flex-col items-center justify-center flex-1 py-1 text-white hover:opacity-80 transition cursor-pointer"
           >
             <Search size={20} className="stroke-[2.5]" />
@@ -310,8 +309,8 @@ const Catalogo = () => {
 
           {/* Elevated Cart Button */}
           <div className="flex-1 flex justify-center -translate-y-4">
-            <button 
-              onClick={() => navigate('/checkout')} 
+            <button
+              onClick={() => navigate('/checkout')}
               className="w-14 h-14 rounded-full bg-white dark:bg-slate-800 border-4 border-secondary text-secondary hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center relative cursor-pointer"
             >
               <ShoppingCart size={22} className="stroke-[2.5]" />
@@ -322,8 +321,8 @@ const Catalogo = () => {
           </div>
 
           {/* Orders */}
-          <button 
-            onClick={() => navigate('/dashboard')} 
+          <button
+            onClick={() => navigate('/dashboard')}
             className="flex flex-col items-center justify-center flex-1 py-1 text-white hover:opacity-80 transition cursor-pointer"
           >
             <ClipboardList size={20} className="stroke-[2.5]" />
@@ -331,7 +330,7 @@ const Catalogo = () => {
           </button>
 
           {/* Info */}
-          <button 
+          <button
             onClick={() => {
               alert('Mercado Nery García Zárate - Ayacucho, Perú\nUsa la barra superior para cambiar el tema.');
             }}

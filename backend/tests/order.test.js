@@ -17,6 +17,28 @@ jest.mock('../config/db', () => {
   };
 });
 
+// Mockear pdfkit para simular el comportamiento de transmisión directa (pipe)
+jest.mock('pdfkit', () => {
+  return jest.fn().mockImplementation(() => {
+    return {
+      pipe: jest.fn().mockImplementation(function(res) {
+        this.res = res;
+        return res;
+      }),
+      fontSize: jest.fn().mockReturnThis(),
+      font: jest.fn().mockReturnThis(),
+      text: jest.fn().mockReturnThis(),
+      moveDown: jest.fn().mockReturnThis(),
+      end: jest.fn().mockImplementation(function() {
+        if (this.res) {
+          this.res.write(Buffer.from('mock pdf binary content'));
+          this.res.end();
+        }
+      })
+    };
+  });
+});
+
 describe('Order Controller Tests (Transactions & PDF)', () => {
   let mockConnection;
 
