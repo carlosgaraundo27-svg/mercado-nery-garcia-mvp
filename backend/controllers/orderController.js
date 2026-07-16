@@ -102,7 +102,7 @@ const procesarCompra = async (req, res, next) => {
 
     // 5. Insertar cabecera de Venta
     const [resultVenta] = await connection.execute(
-      'INSERT INTO ventas (vendedor_id, cliente_nombre, total, metodo_pago, estado) VALUES (?, ?, ?, ?, "completado")',
+      'INSERT INTO ventas (vendedor_id, cliente_nombre, total, metodo_pago) VALUES (?, ?, ?, ?)',
       [product.usuario_id, cliente_nombre, total, metodo_pago]
     );
     const ventaId = resultVenta.insertId;
